@@ -1,0 +1,15 @@
+PODS:
+  - GoogleMaps (1.13.2)
+  - JTAppleCalendar (4.1.2)
+
+DEPENDENCIES:
+  - GoogleMaps
+  - JTAppleCalendar
+
+SPEC CHECKSUMS:
+  GoogleMaps: b20a103ff307f58392e603cf142e59d7e30374c1
+  JTAppleCalendar: f705daea0c7e833a3dbd88aca753c425b565f2c5
+
+PODFILE CHECKSUM: 8774eb1a7db4d0f83b8693eb6cc5c5722220f4b5
+
+COCOAPODS: 1.0.1
