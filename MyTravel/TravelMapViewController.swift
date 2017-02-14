@@ -25,7 +25,7 @@ class TravelMapViewController : UIViewController, UISearchDisplayDelegate, GMSMa
 
     
     ////CORE DATA
-    var appDel: AppDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+    var appDel: AppDelegate = UIApplication.shared.delegate as! AppDelegate
     var contextA : NSManagedObjectContext?
     var sideViewSW = false
     
@@ -34,7 +34,7 @@ class TravelMapViewController : UIViewController, UISearchDisplayDelegate, GMSMa
     //CoreData.sqlite의 저장된 Entity를 배열화 시켜 뿌려주는 배열
     var pins : Array<FavorPin>!
     var googleMapView : GMSMapView?
-    let fetchRequest = NSFetchRequest()
+    let fetchRequest = NSFetchRequest<NSFetchRequestResult>()
     //var searchBar : UISearchBar?
     var tableDataSource : GMSAutocompleteTableDataSource?
     var srchDisplayController : UISearchDisplayController?
@@ -61,19 +61,19 @@ class TravelMapViewController : UIViewController, UISearchDisplayDelegate, GMSMa
         naviView.backgroundColor = MyTravelTag.hexStringToUIColor(MyTravelTag.BACKGROUND_MAIN)
         
     }
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         //CoreData에 있는 Data를 뿌려주는 곳
         
         googleMapView?.clear()
         print("NOW YOUR MAP UID NUM : "+String(MyTravelTag.UID_NUM))
         
                 //Category 거름
-        let entitiy = NSEntityDescription.entityForName("Category", inManagedObjectContext: contextA!)!
+        let entitiy = NSEntityDescription.entity(forEntityName: "Category", in: contextA!)!
         fetchRequest.entity = entitiy
         let predicate = NSPredicate(format: "(uid=%@)",String(MyTravelTag.UID_NUM))
         fetchRequest.predicate = predicate
         
-        categorys = (try! contextA!.executeFetchRequest(fetchRequest) as! [Category])
+        categorys = (try! contextA!.fetch(fetchRequest) as! [Category])
         
         setMarker()
         
@@ -82,13 +82,13 @@ class TravelMapViewController : UIViewController, UISearchDisplayDelegate, GMSMa
         
     }
     func setMarker() {
-        let entitiy : NSEntityDescription = NSEntityDescription.entityForName("FavorPin", inManagedObjectContext: contextA!)!
+        let entitiy : NSEntityDescription = NSEntityDescription.entity(forEntityName: "FavorPin", in: contextA!)!
         
         
         fetchRequest.entity = entitiy
         let predicate = NSPredicate(format: "(uid=%@)",String(MyTravelTag.UID_NUM))
         fetchRequest.predicate = predicate
-        pins = (try! contextA!.executeFetchRequest(fetchRequest) as! [FavorPin])
+        pins = (try! contextA!.fetch(fetchRequest) as! [FavorPin])
         
         if pins.count != 0 {
             //화면에 내가 저장항 마크를 모두 보여주독하는 bounds
@@ -112,11 +112,11 @@ class TravelMapViewController : UIViewController, UISearchDisplayDelegate, GMSMa
                 marker.map = googleMapView
                 bounds = bounds.includingCoordinate(CLLocationCoordinate2DMake(pin.lat, pin.long))
             }
-            googleMapView?.animateWithCameraUpdate(GMSCameraUpdate.fitBounds(bounds, withPadding: 80.0))
+            googleMapView?.animate(with: GMSCameraUpdate.fit(bounds, withPadding: 80.0))
         }else {
             //처음 메모를 등록할경우 위치값을 기본으로 정함 (서울, 대구, 대전)
-            googleMapView?.animateToLocation(CLLocationCoordinate2D(latitude: 37.5609615, longitude: 126.9757965))
-            googleMapView?.animateToZoom(10)
+            googleMapView?.animate(toLocation: CLLocationCoordinate2D(latitude: 37.5609615, longitude: 126.9757965))
+            googleMapView?.animate(toZoom: 10)
         }
         
     }
@@ -150,21 +150,21 @@ class TravelMapViewController : UIViewController, UISearchDisplayDelegate, GMSMa
         contextA = appDel.managedObjectContext
     }
     
-    func didUpdateAutocompletePredictionsForTableDataSource(tableDataSource: GMSAutocompleteTableDataSource) {
+    func didUpdateAutocompletePredictions(for tableDataSource: GMSAutocompleteTableDataSource) {
         // Turn the network activity indicator off.
-        UIApplication.sharedApplication().networkActivityIndicatorVisible = false
+        UIApplication.shared.isNetworkActivityIndicatorVisible = false
         // Reload table data.
         srchDisplayController?.searchResultsTableView.reloadData()
     }
     
-    func didRequestAutocompletePredictionsForTableDataSource(tableDataSource: GMSAutocompleteTableDataSource) {
+    func didRequestAutocompletePredictions(for tableDataSource: GMSAutocompleteTableDataSource) {
         // Turn the network activity indicator on.
-        UIApplication.sharedApplication().networkActivityIndicatorVisible = true
+        UIApplication.shared.isNetworkActivityIndicatorVisible = true
         // Reload table data.
         srchDisplayController?.searchResultsTableView.reloadData()
     }
-    func tableDataSource(tableDataSource: GMSAutocompleteTableDataSource, didAutocompleteWithPlace place: GMSPlace) {
-        srchDisplayController?.active = false
+    func tableDataSource(_ tableDataSource: GMSAutocompleteTableDataSource, didAutocompleteWith place: GMSPlace) {
+        srchDisplayController?.isActive = false
         
         //검색한 부분에 카메라를 이동하고 마크를 찍어준다
         
@@ -179,7 +179,7 @@ class TravelMapViewController : UIViewController, UISearchDisplayDelegate, GMSMa
         marker.map = googleMapView
         
         //카메라 이동
-        googleMapView?.animateToLocation(CLLocationCoordinate2DMake(place.coordinate.latitude, place.coordinate.longitude))
+        googleMapView?.animate(toLocation: CLLocationCoordinate2DMake(place.coordinate.latitude, place.coordinate.longitude))
         
     }
     
@@ -187,9 +187,9 @@ class TravelMapViewController : UIViewController, UISearchDisplayDelegate, GMSMa
     
     //Custom MarkerWindow 마커를 클릭했을 때 뜨는 정보창을 커스텀을 만든돠아아아
     
-    func mapView(mapView: GMSMapView, markerInfoWindow marker: GMSMarker) -> UIView? {
-        let infoWindow = NSBundle.mainBundle().loadNibNamed("CustomMarkerWindow", owner: self, options: nil).first! as! CustomMarkerWindow
-        infoWindow.userInteractionEnabled = true
+    func mapView(_ mapView: GMSMapView, markerInfoWindow marker: GMSMarker) -> UIView? {
+        let infoWindow = Bundle.main.loadNibNamed("CustomMarkerWindow", owner: self, options: nil)?.first! as! CustomMarkerWindow
+        infoWindow.isUserInteractionEnabled = true
         infoWindow.titleLb.text = marker.title
         infoWindow.placeLb.text = marker.snippet
         
@@ -208,21 +208,21 @@ class TravelMapViewController : UIViewController, UISearchDisplayDelegate, GMSMa
         return infoWindow
     }
     
-    func searchDisplayController(controller: UISearchDisplayController, shouldReloadTableForSearchString searchString: String?) -> Bool {
+    func searchDisplayController(_ controller: UISearchDisplayController, shouldReloadTableForSearch searchString: String?) -> Bool {
         tableDataSource?.sourceTextHasChanged(searchString)
         return false
     }
     
-    func tableDataSource(tableDataSource: GMSAutocompleteTableDataSource, didFailAutocompleteWithError error: NSError) {
+    func tableDataSource(_ tableDataSource: GMSAutocompleteTableDataSource, didFailAutocompleteWithError error: NSError) {
         // TODO: Handle the error.
         print("Error: \(error.description)")
     }
     
-    func tableDataSource(tableDataSource: GMSAutocompleteTableDataSource, didSelectPrediction prediction: GMSAutocompletePrediction) -> Bool {
+    func tableDataSource(_ tableDataSource: GMSAutocompleteTableDataSource, didSelect prediction: GMSAutocompletePrediction) -> Bool {
         
         return true
     }
-    func mapView(mapView: GMSMapView, didTapInfoWindowOfMarker marker: GMSMarker) {
+    func mapView(_ mapView: GMSMapView, didTapInfoWindowOf marker: GMSMarker) {
         //새로운 마커인 경우..
         var setControl : SetPlaceViewController?
         var alert : UIAlertController?
@@ -230,9 +230,9 @@ class TravelMapViewController : UIViewController, UISearchDisplayDelegate, GMSMa
         
         if marker.zIndex == 2378 {
             
-            alert = UIAlertController(title: "새로운 마커 생성", message:"정보를 추가하시겠습니까?", preferredStyle: .Alert)
-            action = UIAlertAction(title: "추가하기", style: .Default) { _ in
-                setControl = self.storyboard?.instantiateViewControllerWithIdentifier("SetPlaceViewController") as? SetPlaceViewController
+            alert = UIAlertController(title: "새로운 마커 생성", message:"정보를 추가하시겠습니까?", preferredStyle: .alert)
+            action = UIAlertAction(title: "추가하기", style: .default) { _ in
+                setControl = self.storyboard?.instantiateViewController(withIdentifier: "SetPlaceViewController") as? SetPlaceViewController
                 setControl!.marker = marker
                 setControl!.setType = MyTravelTag.SET_PIN_ADD
                 setControl!.categorys = self.categorys
@@ -241,9 +241,9 @@ class TravelMapViewController : UIViewController, UISearchDisplayDelegate, GMSMa
             }
         //업데이트 할 마커인 경우...
         } else {
-            alert = UIAlertController(title: "지도 수정", message:"이 부분을 수정하시겠습니까?", preferredStyle: .Alert)
-            action = UIAlertAction(title: "수정하기", style: .Default) { _ in
-                setControl = self.storyboard?.instantiateViewControllerWithIdentifier("SetPlaceViewController") as? SetPlaceViewController
+            alert = UIAlertController(title: "지도 수정", message:"이 부분을 수정하시겠습니까?", preferredStyle: .alert)
+            action = UIAlertAction(title: "수정하기", style: .default) { _ in
+                setControl = self.storyboard?.instantiateViewController(withIdentifier: "SetPlaceViewController") as? SetPlaceViewController
                 setControl!.setType = MyTravelTag.SET_PIN_UPDATE
                 setControl!.marker = marker
                 setControl!.categorys = self.categorys
@@ -251,7 +251,7 @@ class TravelMapViewController : UIViewController, UISearchDisplayDelegate, GMSMa
             }
         }
         
-        let cancel = UIAlertAction(title: "취소하기", style: .Cancel, handler: { _ in
+        let cancel = UIAlertAction(title: "취소하기", style: .cancel, handler: { _ in
             if marker.zIndex == 2378 {
                 marker.map = nil
             }else {
@@ -261,93 +261,93 @@ class TravelMapViewController : UIViewController, UISearchDisplayDelegate, GMSMa
         })
         alert!.addAction(action!)
         alert!.addAction(cancel)
-        self.presentViewController(alert!, animated: true){}
+        self.present(alert!, animated: true){}
 
     }
     
     //MARK :: IBACTION
     
     //카테고리 추가, 사이드뷰를 백
-    @IBAction func actCancelHamberger(sender: AnyObject) {
+    @IBAction func actCancelHamberger(_ sender: AnyObject) {
         sideViewSW = false
         
-        UIView.animateWithDuration(0.5, animations: {
-            self.hiddenView.hidden = true
-            self.sideView.transform = CGAffineTransformMakeTranslation(0.0, 0.0)
-            self.newCateView.transform = CGAffineTransformMakeTranslation(0.0,0.0);
+        UIView.animate(withDuration: 0.5, animations: {
+            self.hiddenView.isHidden = true
+            self.sideView.transform = CGAffineTransform(translationX: 0.0, y: 0.0)
+            self.newCateView.transform = CGAffineTransform(translationX: 0.0,y: 0.0);
             }, completion: nil)
     }
-    @IBAction func actHamberger(sender: AnyObject) {
+    @IBAction func actHamberger(_ sender: AnyObject) {
         sideViewSW = true
         
-        UIView.animateWithDuration(0.5, animations: {
-            self.hiddenView.hidden = false
-            self.sideView.transform = CGAffineTransformMakeTranslation(-self.sideView.frame.width, 0.0)
+        UIView.animate(withDuration: 0.5, animations: {
+            self.hiddenView.isHidden = false
+            self.sideView.transform = CGAffineTransform(translationX: -self.sideView.frame.width, y: 0.0)
             }, completion: nil)
         
         sideTableView.showData(self.pins, categorys: categorys,  sTableView: self.sideTableView, tmvControl : self);
         
     }
     //뒤로가기 버튼
-    @IBAction func actBack(sender: AnyObject) {
-        navigationController?.popViewControllerAnimated(true)
+    @IBAction func actBack(_ sender: AnyObject) {
+        navigationController?.popViewController(animated: true)
     }
     
     //UID 기준으로 카테고리를 생성하는 뷰 띄움
-    @IBAction func actAddCategory(sender: AnyObject) {
-        UIView.animateWithDuration(1.0, animations: {
-            self.newCateView.transform = CGAffineTransformMakeTranslation(0.0, -self.view.frame.height/2);
+    @IBAction func actAddCategory(_ sender: AnyObject) {
+        UIView.animate(withDuration: 1.0, animations: {
+            self.newCateView.transform = CGAffineTransform(translationX: 0.0, y: -self.view.frame.height/2);
         })
     }
     
     //카테고리 저장
-    @IBAction func actSaveCategory(sender: AnyObject) {
-        let cate : Category = NSEntityDescription.insertNewObjectForEntityForName("Category", inManagedObjectContext: contextA!) as! Category
+    @IBAction func actSaveCategory(_ sender: AnyObject) {
+        let cate : Category = NSEntityDescription.insertNewObject(forEntityName: "Category", into: contextA!) as! Category
         cate.uid = MyTravelTag.UID_NUM
         cate.title = cateTitleTF.text!
         cate.typenum = MyTravelTag.TYPE_NUM_CATE
         MyTravelTag.TYPE_NUM_CATE = MyTravelTag.TYPE_NUM_CATE + 1
         appDel.saveContext()
-        let entitiy = NSEntityDescription.entityForName("Category", inManagedObjectContext: contextA!)!
+        let entitiy = NSEntityDescription.entity(forEntityName: "Category", in: contextA!)!
         fetchRequest.entity = entitiy
         let predicate = NSPredicate(format: "(uid=%@)",String(MyTravelTag.UID_NUM))
         fetchRequest.predicate = predicate
         
-        categorys = (try! contextA!.executeFetchRequest(fetchRequest) as! [Category])
+        categorys = (try! contextA!.fetch(fetchRequest) as! [Category])
 
         sideTableView.showData(self.pins, categorys: categorys,  sTableView: self.sideTableView, tmvControl : self);
         
     }
-    @IBAction func actCancelCategory(sender: AnyObject) {
-        UIView.animateWithDuration(1.0, animations: {
-            self.newCateView.transform = CGAffineTransformMakeTranslation(0.0,0.0);
+    @IBAction func actCancelCategory(_ sender: AnyObject) {
+        UIView.animate(withDuration: 1.0, animations: {
+            self.newCateView.transform = CGAffineTransform(translationX: 0.0,y: 0.0);
         })
     }
     
-    @IBAction func actUpdateCate(sender: AnyObject) {
+    @IBAction func actUpdateCate(_ sender: AnyObject) {
         sideTableView.setEditing(true, animated: true)
     }
     
     
     //TOUCH EVENT
-    override func touchesMoved(touches: Set<UITouch>, withEvent event: UIEvent?) {
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         if sideViewSW {
             //사이드뷰가 올라와 있는 경우,
             let touch = touches.first! as UITouch
-            let touchLocation = touch.locationInView(self.hiddenView)
+            let touchLocation = touch.location(in: self.hiddenView)
                 print(touchLocation.x-self.view.frame.width)
                 let pos = touchLocation.x-self.sideView.frame.width
             
             if pos > -20.0 {
-                UIView.animateWithDuration(0.1, animations: {
-                    self.sideView.transform = CGAffineTransformMakeTranslation(0.0,0.0)
-                    self.hiddenView.hidden = true
+                UIView.animate(withDuration: 0.1, animations: {
+                    self.sideView.transform = CGAffineTransform(translationX: 0.0,y: 0.0)
+                    self.hiddenView.isHidden = true
                 })
                 sideViewSW = false
                 
             }else {
-                UIView.animateWithDuration(0.1, animations: {
-                    self.sideView.transform = CGAffineTransformMakeTranslation(pos,0.0)
+                UIView.animate(withDuration: 0.1, animations: {
+                    self.sideView.transform = CGAffineTransform(translationX: pos,y: 0.0)
                 })
             }
             

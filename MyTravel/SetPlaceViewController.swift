@@ -24,7 +24,7 @@ class SetPlaceViewController: UIViewController, UIPickerViewDelegate, UIPickerVi
     
     
     ////CORE DATA
-    var appDel: AppDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+    var appDel: AppDelegate = UIApplication.shared.delegate as! AppDelegate
     var contextA : NSManagedObjectContext?
     
     var marker : GMSMarker?
@@ -37,7 +37,7 @@ class SetPlaceViewController: UIViewController, UIPickerViewDelegate, UIPickerVi
         super.viewDidLoad()
         if (categorys?.count == 0){
             print("ERROR NO CATEGORY")
-            self.navigationController?.popViewControllerAnimated(true)
+            self.navigationController?.popViewController(animated: true)
         }
         
         contextA = appDel.managedObjectContext
@@ -47,12 +47,12 @@ class SetPlaceViewController: UIViewController, UIPickerViewDelegate, UIPickerVi
         
         if setType == MyTravelTag.SET_PIN_UPDATE {
             titleLB.text = (marker?.title)!+"수정하시게요?"
-            let entitiy : NSEntityDescription = NSEntityDescription.entityForName("FavorPin", inManagedObjectContext: contextA!)!
-            let fetchRequest = NSFetchRequest()
+            let entitiy : NSEntityDescription = NSEntityDescription.entity(forEntityName: "FavorPin", in: contextA!)!
+            let fetchRequest = NSFetchRequest<NSFetchRequestResult>()
             fetchRequest.entity = entitiy
             let predicate = NSPredicate(format: "(lat=%@) AND (long=%@)",argumentArray: [(marker?.position.latitude)!,(marker?.position.longitude)!])
             fetchRequest.predicate = predicate
-            willUpdatePin = (try! contextA!.executeFetchRequest(fetchRequest) as! [FavorPin])
+            willUpdatePin = (try! contextA!.fetch(fetchRequest) as! [FavorPin])
             
             if willUpdatePin?.count != 0 {
 //                typeTF.text = willUpdatePin![0].type
@@ -73,29 +73,29 @@ class SetPlaceViewController: UIViewController, UIPickerViewDelegate, UIPickerVi
         backGroundView.backgroundColor = MyTravelTag.hexStringToUIColor(MyTravelTag.BACKGROUND_MAIN)
     }
     //MARK :: PICKER VIEW DELEGATE
-    func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 1
     }
-    func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
         return (categorys?.count)!
     }
-    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
         return categorys![row].title;
     }
 
-    @IBAction func actSave(sender: AnyObject) {
+    @IBAction func actSave(_ sender: AnyObject) {
 
         
-        let formatter = NSDateFormatter()
+        let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
-        let timeText = formatter.stringFromDate(NSDate())
+        let timeText = formatter.string(from: Date())
         
         if setType == MyTravelTag.SET_PIN_UPDATE {
             
             
             if willUpdatePin?.count != 0 {
                 //willUpdatePin![0].type = typeTF.text!
-                willUpdatePin![0].type = Int(categorys![catepicker.selectedRowInComponent(0)].typenum)
+                willUpdatePin![0].type = Int(categorys![catepicker.selectedRow(inComponent: 0)].typenum)
                 willUpdatePin![0].content = contentTF.text!
                 willUpdatePin![0].date = savedDateTF.text!
                 willUpdatePin![0].pos = addressTF.text!
@@ -105,7 +105,7 @@ class SetPlaceViewController: UIViewController, UIPickerViewDelegate, UIPickerVi
         }else if setType == MyTravelTag.SET_PIN_ADD {
             //CoreData에 저장하는 부분
             
-            let pin: FavorPin = NSEntityDescription.insertNewObjectForEntityForName("FavorPin", inManagedObjectContext: contextA!) as! FavorPin
+            let pin: FavorPin = NSEntityDescription.insertNewObject(forEntityName: "FavorPin", into: contextA!) as! FavorPin
             
             // 저장될 위치의 제목
             pin.title = titleTF.text!
@@ -119,7 +119,7 @@ class SetPlaceViewController: UIViewController, UIPickerViewDelegate, UIPickerVi
             // 이름주소
             pin.pos = addressTF.text!
             // 맛집인지 볼거리인지 등..
-            pin.type = Int(categorys![catepicker.selectedRowInComponent(0)].typenum)
+            pin.type = Int(categorys![catepicker.selectedRow(inComponent: 0)].typenum)
             // 저장장값 이는 새로운 저장시 올라감
             pin.uid = MyTravelTag.UID_NUM
             MyTravelTag.PRIME_NUM = MyTravelTag.PRIME_NUM + 1
@@ -128,14 +128,14 @@ class SetPlaceViewController: UIViewController, UIPickerViewDelegate, UIPickerVi
             appDel.saveContext()
             
         }
-        self.navigationController?.popViewControllerAnimated(true)
+        self.navigationController?.popViewController(animated: true)
         
     }
-    @IBAction func actDate(sender: AnyObject) {
-        let calControl = self.storyboard?.instantiateViewControllerWithIdentifier("CalenderViewController") as? CalenderViewController
+    @IBAction func actDate(_ sender: AnyObject) {
+        let calControl = self.storyboard?.instantiateViewController(withIdentifier: "CalenderViewController") as? CalenderViewController
         //TAG와 현재날짜를 보내 캘린더의 오류를 줄임 또한 다시 한번 수정하고 싶은 케이스일 경우 ENDTF 초기화
         calControl!.type = "SETDATE"
-        calControl!.myDate = NSDate()
+        calControl!.myDate = Date()
         self.navigationController?.pushViewController(calControl!, animated: true)
     }
     

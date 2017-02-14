@@ -12,7 +12,7 @@ public protocol JTAppleDayCellViewProtocol {
 }
 
 /// A day-cell view. The custom day-cells that you create should be a subclass of JTAppleDayCellView
-public class JTAppleDayCellView: UIView, JTAppleDayCellViewProtocol {
+open class JTAppleDayCellView: UIView, JTAppleDayCellViewProtocol {
 }
 
 
@@ -25,6 +25,6 @@ public protocol JTAppleHeaderViewProtocol {
 }
 
 /// A header view. The custom headerview that you create should be a subclass of JTAppleHeaderView
-public class JTAppleHeaderView: UIView, JTAppleHeaderViewProtocol {
+open class JTAppleHeaderView: UIView, JTAppleHeaderViewProtocol {
 }
 

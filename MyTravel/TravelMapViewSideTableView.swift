@@ -14,7 +14,7 @@ class TravelMapViewSideTableView : UITableView , UITableViewDelegate, UITableVie
     
     
     ////CORE DATA
-    var appDel: AppDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+    var appDel: AppDelegate = UIApplication.shared.delegate as! AppDelegate
     var contextA : NSManagedObjectContext?
     
     
@@ -32,7 +32,7 @@ class TravelMapViewSideTableView : UITableView , UITableViewDelegate, UITableVie
         super.init(coder: aDecoder)
     }
     
-    func showData(pins : [FavorPin], categorys : [Category], sTableView : TravelMapViewSideTableView ,tmvControl : TravelMapViewController){
+    func showData(_ pins : [FavorPin], categorys : [Category], sTableView : TravelMapViewSideTableView ,tmvControl : TravelMapViewController){
         
         if self.sTableView == nil {
             self.sTableView = TravelMapViewSideTableView()
@@ -51,13 +51,13 @@ class TravelMapViewSideTableView : UITableView , UITableViewDelegate, UITableVie
                     print(pin.type)
                     if pin.type == Int(category.typenum) {
                         print(pin.type)
-                        temp.addObject(pin)
+                        temp.add(pin)
                     }else {
                         
                     }
                 }
                 count = count + 1
-                self.pins?.addObject(temp)
+                self.pins?.add(temp)
             }
             //COREDATA INIT
             contextA = appDel.managedObjectContext
@@ -65,18 +65,18 @@ class TravelMapViewSideTableView : UITableView , UITableViewDelegate, UITableVie
         self.sTableView!.reloadData()
     }
     
-    func actDeleteUpdateRow(sender: AnyObject) {
-        let alert = UIAlertController(title: "지도 수정", message:"이 부분을 삭제하기?", preferredStyle: .Alert)
-        let action = UIAlertAction(title: "삭제하기", style: .Default) { _ in
+    func actDeleteUpdateRow(_ sender: AnyObject) {
+        let alert = UIAlertController(title: "지도 수정", message:"이 부분을 삭제하기?", preferredStyle: .alert)
+        let action = UIAlertAction(title: "삭제하기", style: .default) { _ in
             //Section 쪽 ROW 삭제
-            for pin in (self.pins!.objectAtIndex(sender.tag) as! NSMutableArray) {
+            for pin in (self.pins!.object(at: sender.tag) as! NSMutableArray) {
                 print(pin)
-                self.contextA?.deleteObject(pin as! NSManagedObject)
-                self.pins?.objectAtIndex(sender.tag).removeObject(pin)
+                self.contextA?.delete(pin as! NSManagedObject)
+                (self.pins?.object(at: sender.tag) as AnyObject).remove(pin)
                 self.appDel.saveContext()
             }
             //self.contextA?.deleteObject(pins!.objectAtIndex(indexPath.section).objectAtIndex(indexPath.row) as! NSManagedObject)
-            self.contextA?.deleteObject(self.categorys![sender.tag])
+            self.contextA?.delete(self.categorys![sender.tag])
             self.appDel.saveContext()
 //            self.categorys?.removeAtIndex(sender.tag)
             
@@ -84,75 +84,75 @@ class TravelMapViewSideTableView : UITableView , UITableViewDelegate, UITableVie
         
 //            self.sTableView?.reloadData()
 //            self.sTableView?.reloadInputViews()
-            self.sTableView?.reloadSections(NSIndexSet(index : sender.tag), withRowAnimation: UITableViewRowAnimation.Left)
+            self.sTableView?.reloadSections(IndexSet(integer : sender.tag), with: UITableViewRowAnimation.left)
             //Reload MapView...
             self.tmvControl?.setMarker()
         }
         
-        let cancel = UIAlertAction(title: "취소하기", style: .Cancel, handler: { _ in
+        let cancel = UIAlertAction(title: "취소하기", style: .cancel, handler: { _ in
             //DELETE SECTION
             
         })
         
         alert.addAction(action)
         alert.addAction(cancel)
-        self.window?.rootViewController!.presentViewController(alert, animated: true){}
+        self.window?.rootViewController!.present(alert, animated: true){}
     }
 
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = self.sTableView!.dequeueReusableCellWithIdentifier("TravelMapViewSideTableViewCell", forIndexPath: indexPath) as! TravelMapViewSideTableViewCell
-            cell.titleLB.text = self.pins!.objectAtIndex(indexPath.section).objectAtIndex(indexPath.row).title
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = self.sTableView!.dequeueReusableCell(withIdentifier: "TravelMapViewSideTableViewCell", for: indexPath) as! TravelMapViewSideTableViewCell
+            cell.titleLB.text = (self.pins!.object(at: indexPath.section) as AnyObject).objectAtIndex(indexPath.row).title
         return cell
     }
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return pins!.objectAtIndex(section).count
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return (pins!.object(at: section) as AnyObject).count
     }
     //커스텀 Header뷰를 생성하는 부분
-    func tableView(tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         
             
             let view = UIView() // The width will be the same as the cell, and the height should be set in tableView:heightForRowAtIndexPath:
             let label = UILabel()
-            let button   = UIButton(type: UIButtonType.System)
+            let button   = UIButton(type: UIButtonType.system)
             
             label.text = categorys![section].title
-            button.setTitle("삭제", forState: .Normal)
-            button.setTitleColor(UIColor.whiteColor(), forState: .Normal)
+            button.setTitle("삭제", for: UIControlState())
+            button.setTitleColor(UIColor.white, for: UIControlState())
             print("SECTION : "+String(section))
             button.tag =  NSInteger(section)
-            button.addTarget(self, action: #selector(TravelMapViewSideTableView.actDeleteUpdateRow(_:)), forControlEvents: UIControlEvents.TouchUpInside)
+            button.addTarget(self, action: #selector(TravelMapViewSideTableView.actDeleteUpdateRow(_:)), for: UIControlEvents.touchUpInside)
             
             view.addSubview(label)
             view.addSubview(button)
             
             label.translatesAutoresizingMaskIntoConstraints = false
-            label.textColor = UIColor.whiteColor()
+            label.textColor = UIColor.white
             button.translatesAutoresizingMaskIntoConstraints = false
             let views = ["label": label, "button": button, "view": view]
             
-            let horizontallayoutContraints = NSLayoutConstraint.constraintsWithVisualFormat("H:|-10-[label]-60-[button]-10-|", options: .AlignAllCenterY, metrics: nil, views: views)
+            let horizontallayoutContraints = NSLayoutConstraint.constraints(withVisualFormat: "H:|-10-[label]-60-[button]-10-|", options: .alignAllCenterY, metrics: nil, views: views)
             view.addConstraints(horizontallayoutContraints)
             
-            let verticalLayoutContraint = NSLayoutConstraint(item: label, attribute: .CenterY, relatedBy: .Equal, toItem: view, attribute: .CenterY, multiplier: 1, constant: 0)
+            let verticalLayoutContraint = NSLayoutConstraint(item: label, attribute: .centerY, relatedBy: .equal, toItem: view, attribute: .centerY, multiplier: 1, constant: 0)
             view.addConstraint(verticalLayoutContraint)
         
             view.backgroundColor = MyTravelTag.hexStringToUIColor(MyTravelTag.BACKGROUND_MAIN)
             return view
         
     }
-    func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return 50
     }
-    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         return categorys!.count
     }
-    func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-        if editingStyle == .Delete {
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
             //CoreData ROW 제거 부분
-            contextA?.deleteObject(pins!.objectAtIndex(indexPath.section).objectAtIndex(indexPath.row) as! NSManagedObject)
+            contextA?.delete((pins!.object(at: indexPath.section) as AnyObject).object(indexPath.row) as! NSManagedObject)
             appDel.saveContext()
-            self.pins?.objectAtIndex(indexPath.section).removeObjectAtIndex(indexPath.row)
-            self.sTableView?.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
+            (self.pins?.object(at: indexPath.section) as AnyObject).removeObject(at: indexPath.row)
+            self.sTableView?.deleteRows(at: [indexPath], with: .fade)
             self.sTableView?.reloadData()
             
             //Reload MapView...

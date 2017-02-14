@@ -14,7 +14,7 @@ protocol JTAppleCollectionReusableViewProtocol {
 }
 
 /// The header view class of the calendar
-public class JTAppleCollectionReusableView: UICollectionReusableView {
+open class JTAppleCollectionReusableView: UICollectionReusableView {
     var view: JTAppleHeaderView!
 
 
@@ -32,10 +32,10 @@ public class JTAppleCollectionReusableView: UICollectionReusableView {
     func setupHeaderView() {
         
         assert(headerViewXibs.count > 0, "Did you remember to register your xib file to JTAppleCalendarView? call the registerCellViewXib method on it because xib filename is nil")
-        let viewObject = NSBundle.mainBundle().loadNibNamed(currentXib, owner: self, options: [:])
-        assert(viewObject.count > 0, "your nib file name \(currentXib) could not be loaded)")
+        let viewObject = Bundle.main.loadNibNamed(currentXib, owner: self, options: [:])
+        assert((viewObject?.count)! > 0, "your nib file name \(currentXib) could not be loaded)")
         
-        guard let view = viewObject[0] as? JTAppleHeaderView else {
+        guard let view = viewObject?[0] as? JTAppleHeaderView else {
             print("xib file class does not conform to the protocol<JTAppleDayCellViewProtocol>")
             assert(false )
             return
