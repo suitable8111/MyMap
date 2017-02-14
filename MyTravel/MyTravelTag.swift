@@ -4,14 +4,14 @@
 //
 //  Created by Daeho on 2016. 7. 31..
 //  Copyright © 2016년 Daeho. All rights reserved.
-//
+// Swift 3.0..Code
 
 import Foundation
 import UIKit
 
 class MyTravelTag : NSObject {
     
-    //여기가 바꼈네용
+    
     static var PRIME_NUM : Int64 = 0
     static var UID_NUM : Int64 = 0
     static var TYPE_NUM_CATE : Int64 = 0
