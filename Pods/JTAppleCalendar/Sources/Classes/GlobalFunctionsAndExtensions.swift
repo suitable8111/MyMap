@@ -6,45 +6,38 @@
 //
 //
 
-func delayRunOnMainThread(delay:Double, closure:()->()) {
-    dispatch_after(
-        dispatch_time(
-            DISPATCH_TIME_NOW,
-            Int64(delay * Double(NSEC_PER_SEC))
-        ),
-        dispatch_get_main_queue(), closure)
+func delayRunOnMainThread(_ delay:Double, closure:@escaping ()->()) {
+    DispatchQueue.main.asyncAfter(
+        deadline: DispatchTime.now() + Double(Int64(delay * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC), execute: closure)
 }
 
-func delayRunOnGlobalThread(delay:Double, qos: qos_class_t,closure:()->()) {
-    dispatch_after(
-        dispatch_time(
-            DISPATCH_TIME_NOW,
-            Int64(delay * Double(NSEC_PER_SEC))
-        ), dispatch_get_global_queue(qos, 0), closure)
+func delayRunOnGlobalThread(_ delay:Double, qos: qos_class_t,closure:()->()) {
+    DispatchQueue.global(qos: qos).asyncAfter(
+        deadline: DispatchTime.now() + Double(Int64(delay * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC), execute: closure)
 }
 
 /// NSDates can be compared with the == and != operators
-public func ==(lhs: NSDate, rhs: NSDate) -> Bool {
-    return lhs === rhs || lhs.compare(rhs) == .OrderedSame
+public func ==(lhs: Date, rhs: Date) -> Bool {
+    return lhs === rhs || lhs.compare(rhs) == .orderedSame
 }
 /// NSDates can be compared with the > and < operators
-public func <(lhs: NSDate, rhs: NSDate) -> Bool {
-    return lhs.compare(rhs) == .OrderedAscending
+public func <(lhs: Date, rhs: Date) -> Bool {
+    return lhs.compare(rhs) == .orderedAscending
 }
 
 
 
-extension NSDate: Comparable { }
-extension NSDate {
-    class func startOfMonthForDate(date: NSDate, usingCalendar calendar:NSCalendar) -> NSDate? {
-        let dayOneComponents = calendar.components([.Era, .Year, .Month], fromDate: date)
-        return calendar.dateFromComponents(dayOneComponents)
+extension Date: Comparable { }
+extension Date {
+    static func startOfMonthForDate(_ date: Date, usingCalendar calendar:Calendar) -> Date? {
+        let dayOneComponents = (calendar as NSCalendar).components([.era, .year, .month], from: date)
+        return calendar.date(from: dayOneComponents)
     }
     
-    class func endOfMonthForDate(date: NSDate, usingCalendar calendar:NSCalendar) -> NSDate? {
-        let lastDayComponents = calendar.components([NSCalendarUnit.Era, NSCalendarUnit.Year, NSCalendarUnit.Month], fromDate: date)
-        lastDayComponents.month = lastDayComponents.month + 1
+    static func endOfMonthForDate(_ date: Date, usingCalendar calendar:Calendar) -> Date? {
+        var lastDayComponents = (calendar as NSCalendar).components([NSCalendar.Unit.era, NSCalendar.Unit.year, NSCalendar.Unit.month], from: date)
+        lastDayComponents.month = lastDayComponents.month! + 1
         lastDayComponents.day = 0
-        return calendar.dateFromComponents(lastDayComponents)
+        return calendar.date(from: lastDayComponents)
     }
 }
